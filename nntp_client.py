@@ -22,9 +22,19 @@ def get_groups():
     return group_list
 
 
-def get_articles(group):
+def get_article_list(group):
     """Returns a list of articles from a group"""
     server = connect()
     resp, articles = server.newnews(group, datetime.date(2000, 10, 5))
-    print(articles)
     return articles
+
+
+def get_article(message_id):
+    """Returns a string with the message content"""
+    server = connect()
+    resp, info = server.article(message_id)
+    content = ""
+    for line in info.lines:
+        content += line
+    print(content)
+    return content
