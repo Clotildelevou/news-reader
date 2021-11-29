@@ -1,0 +1,26 @@
+<SearchButton>
+    BoxLayout:
+        orientation: "vertical"
+        size: root.width, root.height
+
+        padding: 50
+        spacing: 20
+
+        Label:
+            id: search_loop
+
+        Button:
+            font_size: 32
+            size_hint: 0.05, 0.09
+            pos_hint: {'center_x': 0.5}
+            background_color: 0,0,0,0
+
+            on_press: root.launch_search()
+            on_release: root.reset()
+
+            Image:
+                id: loupe_img
+                source: "img/loupe.png"
+                center_x: self.parent.center_x
+                center_y: self.parent.center_y
+                size: (32, 32)
