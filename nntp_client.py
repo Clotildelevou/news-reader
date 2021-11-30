@@ -11,7 +11,6 @@ def get_groups():
     group_list = []
     for group in group_tuple:
         group_list.append(group.group)
-    server.quit()
     return group_list
 
 
@@ -35,28 +34,25 @@ def get_all_articles():
 def get_group_articles(group):
     """Returns a list of articles from a group"""
     server = NNTP('news.epita.fr')
-    tuple = ()
+    over = ()
     _, _, first, last, _ = server.group(group)
     try:
-        tuple = server.over((first, last))
+        over = server.over((first, last))
     except nntplib.NNTPError as err:
         pass
-    server.quit()
-    return tuple[1]
+    return over[1]
 
 
 def refresh_articles(group, last_refresh):
     """Returns a list of new articles from a group since last refresh"""
     server = NNTP('news.epita.fr')
     resp, articles = server.newnews(group, last_refresh)
-    server.quit()
     return articles
 
 
 def get_article_content(group, message_id):
     """Returns a string with the message content"""
     server = NNTP('news.epita.fr')
-    tuple = ()
     _, _, first, last, _ = server.group(group)
     try:
         tuple = server.over((first, last))
@@ -70,8 +66,6 @@ def get_article_content(group, message_id):
         head += line.decode('UTF-8') + "\n"
     for line in info_body.lines:
         body += line.decode('UTF-8') + "\n"
-    print(colors.OKGREEN + "Group articles fetched !" + colors.ENDC)
-    server.quit()
     return head, body
 
 
