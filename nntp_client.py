@@ -45,6 +45,12 @@ def get_group_articles(group):
     return tuple[1]
 
 
+def refresh_articles(group, last_refresh):
+    """Returns a list of new articles from a group since last refresh"""
+    server = NNTP('news.epita.fr')
+    resp, articles = server.newnews(group, last_refresh)
+    server.quit()
+    return articles
 
 
 def get_article(message_id):
