@@ -53,12 +53,26 @@ def refresh_articles(group, last_refresh):
     return articles
 
 
-def get_article(message_id):
+def get_article_content(group, message_id):
     """Returns a string with the message content"""
-    server = connect()
-    resp, info = server.article(message_id)
-    content = ""
-    for line in info.lines:
-        content += line
-    print(content)
-    return content
+    server = NNTP('news.epita.fr')
+    tuple = ()
+    _, _, first, last, _ = server.group(group)
+    try:
+        tuple = server.over((first, last))
+    except nntplib.NNTPError as err:
+        pass
+    _, info_head = server.head(message_id)
+    _, info_body = server.body(message_id)
+    head = ""
+    body = ""
+    for line in info_head.lines:
+        head += line.decode('UTF-8') + "\n"
+    for line in info_body.lines:
+        body += line.decode('UTF-8') + "\n"
+    print(colors.OKGREEN + "Group articles fetched !" + colors.ENDC)
+    server.quit()
+    return head, body
+
+
+
