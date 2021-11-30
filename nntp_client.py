@@ -66,4 +66,12 @@ def get_article_content(group, message_id):
     return head, body
 
 
+def pretty_print_article(group, message_id):
+    """Pretty prints the overview of an article"""
+    server = NNTP('news.epita.fr')
+    server.group(group)
+    head, body = get_article_content(group, message_id)
+    print(colors.BOLD + head['Subject'] + colors.ENDC)
+    print(body)
+    print(colors.BOLD + head['From'] + colors.ENDC)
 
