@@ -15,7 +15,24 @@ def get_groups():
     return group_list
 
 
-def get_article_list(group):
+def get_all_articles():
+    """Returns a list of articles from all groups"""
+    server = NNTP('news.epita.fr')
+    resp, group_tuple = server.list()
+    group_list = []
+    article_list = [[]]
+    for group in group_tuple:
+        group_list.append(group.group)
+        _, _, first, last, _ = server.group(group.group)
+        try:
+            article_list.append(server.over((first, last)))
+        except nntplib.NNTPError:
+            pass
+    server.quit()
+    return article_list
+
+
+def get_group_articles(group):
     """Returns a list of articles from a group"""
     server = connect()
     resp, articles = server.newnews(group, datetime.date(2000, 10, 5))
