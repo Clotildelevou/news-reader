@@ -67,11 +67,21 @@ def get_article_content(group, message_id):
 
 
 def pretty_print_article(group, message_id):
-    """Pretty prints the overview of an article"""
+    """Pretty prints the body of an article"""
     server = NNTP('news.epita.fr')
     server.group(group)
     head, body = get_article_content(group, message_id)
     print(colors.BOLD + head['Subject'] + colors.ENDC)
     print(body)
     print(colors.BOLD + head['From'] + colors.ENDC)
+
+
+def pretty_print_ow(group, message_id):
+    """Pretty prints the overview of an article"""
+    server = NNTP('news.epita.fr')
+    server.group(group)
+    head, body = get_article_content(group, message_id)
+    print(head['Subject'])
+    print(head['From'])
+    print(head['Date'] + "\n")
 
