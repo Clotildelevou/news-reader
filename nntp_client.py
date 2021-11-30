@@ -27,7 +27,6 @@ def get_all_articles():
             article_list.append(server.over((first, last)))
         except nntplib.NNTPError:
             pass
-    server.quit()
     return article_list
 
 
@@ -54,16 +53,14 @@ def get_article_content(group, message_id):
     """Returns a string with the message content"""
     server = NNTP('news.epita.fr')
     _, _, first, last, _ = server.group(group)
-    try:
-        tuple = server.over((first, last))
-    except nntplib.NNTPError as err:
-        pass
+    _, _ = server.over((first, last))
     _, info_head = server.head(message_id)
     _, info_body = server.body(message_id)
-    head = ""
+    head = {}
     body = ""
     for line in info_head.lines:
-        head += line.decode('UTF-8') + "\n"
+        entry = (line.decode('UTF-8')).split(": ")
+        head[entry[0]] = entry[1]
     for line in info_body.lines:
         body += line.decode('UTF-8') + "\n"
     return head, body
