@@ -1,3 +1,4 @@
+from datetime import date, timedelta
 from nntplib import NNTP
 import nntplib
 from colors import colors
@@ -85,3 +86,12 @@ def pretty_print_ow(group, message_id):
     print(head['From'])
     print(head['Date'] + "\n")
 
+
+def save_latest_news(groups):
+    file = open("~/.config/conky/latest_news.txt", "a")
+    server = NNTP('news.epita.fr')
+    resp, articles = server.newgroups(date.today() - timedelta(days=1))
+    for article in articles:
+
+        art_num, over = server.over(article)[0]
+        nntplib.decode_header(over['from'])

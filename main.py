@@ -8,5 +8,5 @@ if __name__ == '__main__':
     news_index = 0
     groups = cli.get_groups()
     art_list = cli.get_group_articles(groups[group_index])
-    cli.pretty_print_article(groups[group_index], art_list[news_index][DICT]['message-id'])
+    cli.pretty_print_ow(groups[group_index], art_list[news_index][DICT]['message-id'])
     exit(0)
