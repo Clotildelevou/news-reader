@@ -133,3 +133,5 @@ dmypy.json
 # Other
 *.xml
 *.iml
+main.py
+.gitignore
