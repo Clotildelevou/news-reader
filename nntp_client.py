@@ -1,24 +1,17 @@
 from nntplib import NNTP
-import datetime
-
-
-def connect():
-    """Connects to the EPITA news server"""
-    server = NNTP('news.epita.fr')
-    if server is None:
-        print("Error in fetching server")
-        exit(-1)
-    return server
+import nntplib
+from colors import colors
 
 
 def get_groups():
     """Returns a collection tuple ['group', 'last', 'first', 'flag']
     of the groups existing since i (the creator) was born"""
-    server = connect()
-    resp, group_tuple = server.newgroups(datetime.date(2000, 10, 5))
+    server = NNTP('news.epita.fr')
+    resp, group_tuple = server.list()
     group_list = []
     for group in group_tuple:
         group_list.append(group.group)
+    server.quit()
     return group_list
 
 
