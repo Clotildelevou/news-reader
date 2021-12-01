@@ -1,3 +1,4 @@
+import os
 from datetime import date, timedelta
 from nntplib import NNTP
 import nntplib
@@ -87,11 +88,20 @@ def pretty_print_ow(group, message_id):
     print(head['Date'] + "\n")
 
 
-def save_latest_news(groups):
-    file = open("~/.config/conky/latest_news.txt", "a")
+def save_latest_news():
+    if os.path.exists("~/.config/conky/latest_news.txt"):
+        append_write = 'a+'
+        print("exists")
+    else:
+        append_write = 'w+'
+
+    file = open("/home/clou/.config/conky/latest_news.txt", append_write)
     server = NNTP('news.epita.fr')
     resp, articles = server.newgroups(date.today() - timedelta(days=1))
     for article in articles:
-
-        art_num, over = server.over(article)[0]
-        nntplib.decode_header(over['from'])
+        resp, overviews = server.over(article)
+        art_num, over = overviews[0]
+        file.write(nntplib.decode_header(over['subject']) + "\n")
+        file.write(nntplib.decode_header(over['from']) + "\n")
+        file.write(nntplib.decode_header(over['date']) + "\n")
+    file.close()
