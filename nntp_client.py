@@ -12,7 +12,7 @@ def get_groups():
     resp, group_tuple = server.list()
     group_list = []
     for group in group_tuple:
-        group_list.append(group.group)
+        group_list.append(group)
     return group_list
 
 
@@ -23,8 +23,8 @@ def get_all_articles():
     group_list = []
     article_list = [[]]
     for group in group_tuple:
-        group_list.append(group.group)
-        _, _, first, last, _ = server.group(group.group)
+        group_list.append(group)
+        _, _, first, last, _ = server.group(group)
         try:
             article_list.append(server.over((first, last)))
         except nntplib.NNTPError:
@@ -88,20 +88,28 @@ def pretty_print_ow(group, message_id):
     print(head['Date'] + "\n")
 
 
-def save_latest_news():
-    if os.path.exists("~/.config/conky/latest_news.txt"):
+def save_latest_news(path):
+    """Pretty prints news data in a file the news in selected groups"""
+    if os.path.exists(path):
         append_write = 'a+'
-        print("exists")
     else:
         append_write = 'w+'
-
-    file = open("/home/clou/.config/conky/latest_news.txt", append_write)
+    file = open(path, append_write)
     server = NNTP('news.epita.fr')
-    resp, articles = server.newgroups(date.today() - timedelta(days=1))
-    for article in articles:
-        resp, overviews = server.over(article)
-        art_num, over = overviews[0]
-        file.write(nntplib.decode_header(over['subject']) + "\n")
-        file.write(nntplib.decode_header(over['from']) + "\n")
-        file.write(nntplib.decode_header(over['date']) + "\n")
+
+    resp, group_tuple = server.list()
+    group_list = []
+    for group in group_tuple:
+        group_list.append(group[0])
+
+    for group in group_list:
+        print(group)
+        resp, articles = server.newnews(group, date.today() - timedelta(days=20))
+        print(resp)
+        for article in articles:
+            print(article)
+            head, body = get_article_content(group, article)
+            file.write(head['Subject'] + "\n")
+            file.write(head['From'] + "\n")
+            file.write(body)
     file.close()
