@@ -1,4 +1,5 @@
 import os
+import sys
 from datetime import date, timedelta
 from nntplib import NNTP
 import nntplib
@@ -91,7 +92,25 @@ def pretty_print_ow(group, message_id):
     print(head['Date'] + "\n")
 
 
-def save_latest_news(path):
+def select_groups():
+    groups = get_groups()
+    for group in groups:
+        sys.stdout.flush()
+        line = input("Do you want to follow " + group.group + "? [Y/n] ")
+        if line == "Y" or line == "" or line == "y":
+            print("Group added")
+            continue
+        if line == "n":
+            groups.remove(group)
+            print("Group not added")
+            continue
+        else:
+            print("Invalid input group added by default")
+            continue
+    return groups
+
+
+def save_latest_news(path, groups):
     """Pretty prints news data in a file the news in selected groups"""
     if os.path.exists(path):
         append_write = 'a+'
@@ -100,12 +119,8 @@ def save_latest_news(path):
     file = open(path, append_write)
     server = NNTP('news.epita.fr')
 
-    resp, group_tuple = server.list()
-    group_list = []
-    for group in group_tuple:
-        group_list.append(group[0])
-
-    for group in group_list[0:len(group_list) - 1]:
+    for group in groups:
+        print(date.today() - timedelta(days=1))
         resp, articles = server.newnews(group, date.today() - timedelta(days=1))
         for article in articles:
             head, body = get_article_content(group, article)
