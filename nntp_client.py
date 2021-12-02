@@ -120,8 +120,7 @@ def save_latest_news(path, groups):
     server = NNTP('news.epita.fr')
 
     for group in groups:
-        print(date.today() - timedelta(days=1))
-        resp, articles = server.newnews(group, date.today() - timedelta(days=1))
+        resp, articles = server.newnews(group, date.today())
         for article in articles:
             head, body = get_article_content(group, article)
             if 'Subject' in head and 'From' in head:
