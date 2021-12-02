@@ -1,3 +1,5 @@
+import os
+from datetime import date, timedelta
 from nntplib import NNTP
 import nntplib
 from colors import colors
@@ -10,7 +12,7 @@ def get_groups():
     resp, group_tuple = server.list()
     group_list = []
     for group in group_tuple:
-        group_list.append(group.group)
+        group_list.append(group)
     return group_list
 
 
@@ -21,8 +23,8 @@ def get_all_articles():
     group_list = []
     article_list = [[]]
     for group in group_tuple:
-        group_list.append(group.group)
-        _, _, first, last, _ = server.group(group.group)
+        group_list.append(group)
+        _, _, first, last, _ = server.group(group)
         try:
             article_list.append(server.over((first, last)))
         except nntplib.NNTPError:
@@ -59,15 +61,18 @@ def get_article_content(group, message_id):
     head = {}
     body = ""
     for line in info_head.lines:
-        entry = (line.decode('UTF-8')).split(": ")
-        head[entry[0]] = entry[1]
+        entry = (nntplib.decode_header(line.decode('UTF-8')).split(": "))
+        if len(entry) == 2:
+            head[entry[0]] = entry[1]
     for line in info_body.lines:
-        body += line.decode('UTF-8') + "\n"
+        body += (nntplib.decode_header(line.decode('UTF-8')))
+    if len(body) > 1024:
+        body = body[0:1024] + "...\n"
     return head, body
 
 
 def pretty_print_article(group, message_id):
-    """Pretty prints the overview of an article"""
+    """Pretty prints the body of an article"""
     server = NNTP('news.epita.fr')
     server.group(group)
     head, body = get_article_content(group, message_id)
@@ -75,3 +80,35 @@ def pretty_print_article(group, message_id):
     print(body)
     print(colors.BOLD + head['From'] + colors.ENDC)
 
+
+def pretty_print_ow(group, message_id):
+    """Pretty prints the overview of an article"""
+    server = NNTP('news.epita.fr')
+    server.group(group)
+    head, body = get_article_content(group, message_id)
+    print(head['Subject'])
+    print(head['From'])
+    print(head['Date'] + "\n")
+
+
+def save_latest_news(path):
+    """Pretty prints news data in a file the news in selected groups"""
+    if os.path.exists(path):
+        append_write = 'a+'
+    else:
+        append_write = 'w+'
+    file = open(path, append_write)
+    server = NNTP('news.epita.fr')
+
+    resp, group_tuple = server.list()
+    group_list = []
+    for group in group_tuple:
+        group_list.append(group[0])
+
+    for group in group_list[0:len(group_list) - 1]:
+        resp, articles = server.newnews(group, date.today() - timedelta(days=1))
+        for article in articles:
+            head, body = get_article_content(group, article)
+            if 'Subject' in head and 'From' in head:
+                file.write(head['Subject'] + "\n" + head['From'] + "\n" + body + "\n\n")
+    file.close()
