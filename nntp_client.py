@@ -61,10 +61,13 @@ def get_article_content(group, message_id):
     head = {}
     body = ""
     for line in info_head.lines:
-        entry = (line.decode('UTF-8')).split(": ")
-        head[entry[0]] = entry[1]
+        entry = (nntplib.decode_header(line.decode('UTF-8')).split(": "))
+        if len(entry) == 2:
+            head[entry[0]] = entry[1]
     for line in info_body.lines:
-        body += line.decode('UTF-8') + "\n"
+        body += (nntplib.decode_header(line.decode('UTF-8')))
+    if len(body) > 1024:
+        body = body[0:1024] + "...\n"
     return head, body
 
 
@@ -102,14 +105,10 @@ def save_latest_news(path):
     for group in group_tuple:
         group_list.append(group[0])
 
-    for group in group_list:
-        print(group)
-        resp, articles = server.newnews(group, date.today() - timedelta(days=20))
-        print(resp)
+    for group in group_list[0:len(group_list) - 1]:
+        resp, articles = server.newnews(group, date.today() - timedelta(days=1))
         for article in articles:
-            print(article)
             head, body = get_article_content(group, article)
-            file.write(head['Subject'] + "\n")
-            file.write(head['From'] + "\n")
-            file.write(body)
+            if 'Subject' in head and 'From' in head:
+                file.write(head['Subject'] + "\n" + head['From'] + "\n" + body + "\n\n")
     file.close()
